@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		/*或者使用媒体查询,但是没有js灵活,也需要计算 width/设计稿*100 */
+		@media only screen and (min-width: 320px){
+		    html {   
+		        font-size: 5px;
+		    }
+		}
+		
+		@media only screen and (min-width: 375px){
+		    html {
+		        font-size: 6px;
+		    }
+		}
+	</style>
+</head>
+<body>
+	rem是在html/body设置的根元素,可用media query来设置适配或者用js来适配.
+em是相对父元素的,如果html设置为10px,div又需要5px,则div为0.5em,但是div里面的元素又会相对div来设置,所以很混乱.
+
+rem的缺点:
+	1.
+		一个APP里native界面和Web界面混合使用时,rem在不同尺寸屏幕上的适配与nativ	e界面适配不一致.
+		这样会导致在部分机型及屏幕上,一个APP内同一个控件在native界面和Web界面上的尺寸不一致.比如:列表页使用native做的,详情页是用rem做的,设计师希望列表页与详情页字号都一致,换算rem时如果用iphone5的尺寸换算,那么在plus上,详情页的字号会大于列表页.
+	2.
+		rem在多屏幕尺寸适配上与当前两大平台的设计哲学不一致.
+		IOS与Android平台的适配方式背后隐藏的设计哲学是这样的:阅读文字时,可读性较好的文字字号行距等绝对尺寸数值组合与文字所在的媒介的绝对尺寸关系不大;在看图片视频时,图片、视频的比列应该是固定的,不应该出现拉伸变性的情况.而rem用在字号时,使字号在不同的屏幕上的绝对尺寸不一致,违背了设计哲学
+		理解:不论在大小屏幕,适合人观看的大小是15,而不应该随屏幕大小改变
+	<script>
+		//designWidth:设计稿的实际宽度值，需要根据实际设置
+		//maxWidth:制作稿的最大宽度值，需要根据实际设置
+		//这段js的最后面有两个参数记得要设置，一个为设计稿实际宽度，一个为制作稿最大宽度，例如设计稿为750，最大宽度为750，则为(750,750)
+
+		/*使用方法：
+
+		1.复制上面这段代码到你的页面的头部的script标签的最前面。
+
+		2.根据设计稿大小，调整里面的最后两个参数值。
+
+		3.使用1rem=100px转换你的设计稿的像素，例如设计稿上某个块是100px*300px,换算成rem则为1rem*3rem。*/
+		(function(designWidth, maxWidth) { // 未研究
+		   	var doc = document,
+			win = window,
+			docEl = doc.documentElement,
+			remStyle = document.createElement("style"),
+			tid;
+
+			function refreshRem() {
+				var width = docEl.getBoundingClientRect().width;
+				maxWidth = maxWidth || 540;
+				width>maxWidth && (width=maxWidth);
+				var rem = width * 100 / designWidth;
+				remStyle.innerHTML = 'html{font-size:' + rem + 'px;}';
+			}
+
+			if (docEl.firstElementChild) {
+				docEl.firstElementChild.appendChild(remStyle);
+			} else {
+				var wrap = doc.createElement("div");
+				wrap.appendChild(remStyle);
+				doc.write(wrap.innerHTML);
+				wrap = null;
+			}
+			//要等 wiewport 设置好后才能执行 refreshRem，不然 refreshRem 会执行2次；
+			refreshRem();
+
+			win.addEventListener("resize", function() {
+				clearTimeout(tid); //防止执行两次
+				tid = setTimeout(refreshRem, 300);
+			}, false);
+
+			win.addEventListener("pageshow", function(e) {
+				if (e.persisted) { // 浏览器后退的时候重新计算
+					clearTimeout(tid);
+					tid = setTimeout(refreshRem, 300);
+				}
+			}, false);
+
+			if (doc.readyState === "complete") {
+				doc.body.style.fontSize = "16px";
+			} else {
+				doc.addEventListener("DOMContentLoaded", function(e) {
+					doc.body.style.fontSize = "16px";
+				}, false);
+			}
+		})(750, 750);
+	</script>
+	<script>
+		(function(win) {
+		    var remCalc = {};
+		    var docEl = win.document.documentElement;
+		    var tid = null;
+
+		    function refreshRem() {
+		        // 获取当前窗口的宽度
+		        var width = docEl.getBoundingClientRect().width;
+		        // 大于640px 按640算
+		        if (width > 640) width = 640; 
+		        // 把窗口的宽度固定分为10份 也就是10rem 
+		        // 按视觉稿640算  640/10=64px  那么1rem = 64px
+		        // 640视觉中 80px*80px的按钮 转换为rem  80/64 = 1.25rem
+		        // 按钮的宽高固定为  1.25rem * 1.25rem
+		        // 当窗口宽度缩放为 320px的时候
+		        // 那么 1rem = 32px 
+		        // 原来 80px*80px的按钮现在变为 1.25rem * 32px = 40px
+		        // 按钮变为 40px * 40px
+		        // 其他宽度也类似
+		        // 
+		        // cms做法也类似
+		        // 只是我们把窗口宽度固定分为 6.4份，即6.4rem
+		        // 所以 1rem = 100px
+		        // 640视觉中 80px*80px的按钮 转换为rem  80/100 = 0.8rem
+		        // ....其他也差不多
+		        // 
+		        // 
+		        // 对比
+		        // 其实也就是计算rem的问题 视觉稿量出来的值  除64 或 100的问题
+		        // 除100 总比 除64 好口算
+		        // 就算用sass写个 @function px2rem代替口算
+		        // .8rem 总比输入 px2rem(80)少几个字符
+		        // 
+		        // 
+		        var rem = width / 640 * 100;  // cms 只要把这行改成  var rem = width /640 * 100 
+		        docEl.style.fontSize = rem + "px";
+		        remCalc.rem = rem;
+		        //误差、兼容性处理
+		        //获取到html上实际的fontSize,用parseFloat隐式转换去掉多余字符串并返回数字
+		        var actualSize = parseFloat(window.getComputedStyle(document.documentElement)["font-size"]);
+		        if (actualSize !== rem && actualSize > 0 && Math.abs(actualSize - rem) > 1) { // 误差不大于1
+		            var remScaled = rem * rem / actualSize;
+		            docEl.style.fontSize = remScaled + "px";
+		        }
+		    }
+
+		    //函数节流，避免频繁更新
+		    function dbcRefresh() {
+		        clearTimeout(tid);
+		        tid = setTimeout(refreshRem, 100);
+		    }
+
+		    //窗口更新动态改变font-size
+		    win.addEventListener("resize", function() { dbcRefresh(); }, false);
+
+		    //页面显示的时候再计算一次   难道切换窗口之后再切换来窗口大小会变?....
+		    win.addEventListener("pageshow", function(e) {
+		        if (e.persisted) { dbcRefresh(); }
+		    }, false);
+		    refreshRem();
+		    remCalc.refreshRem = refreshRem;
+		    // 以下暂未明白
+		    remCalc.rem2px = function(d) {
+		        var val = parseFloat(d) * this.rem;
+		        if (typeof d === "string" && d.match(/rem$/)) { val += "px"; }
+		        return val;
+		    };
+		    remCalc.px2rem = function(d) {
+		        var val = parseFloat(d) / this.rem;
+		        if (typeof d === "string" && d.match(/px$/)) { val += "rem"; }
+		        return val;
+		    };
+		    win.remCalc = remCalc;
+		})(window);
+
+	</script>
+</body>
+</html>

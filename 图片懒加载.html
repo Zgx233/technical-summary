@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  基本思路:
+    1.占位符
+    2.低质量图片显示,高质量图片替换
+    3.图片src可放在如自定义属性original内
+    3.当页面滚动时,判断图片是否在可视区域内,然后用真实src加载
+
+  节流优化:
+    因为滚动事件的触发频率太高,实际不需要那么高的触发频率,而且不用每次滚动都触发事件,筛选
+    图片还耗费性能,只有当触发间隔到了阀值.防止滚动一下就搜索一下当前图片,防止用户快速下拉.
+    <script>
+      例:JQ
+      var scrollTimer = null;
+      window.scroll(function () {
+        clearTimeout(scrollTime)
+        scrollTimer = setTimeout(load, 150)
+      })
+
+      var resizeTimer = null;
+      window.resize(function () {
+        clearTimeout(resizeTimer)
+        resizeTimer = setTimeout(load, 100)
+      })
+
+      Js
+      window.addEventListener('scroll', function (e) {
+        clearTimer(scrollTimer)
+        scrollTimer = setTimeout(load, 150)
+      })
+
+      window.addEventListener('resize', function (e) {
+        clearTimer(resizeTimer)
+        resizeTimer = setTimeout(load, 100)
+      })
+    </script>
+    知乎的懒加载:
+    <figure>
+      <noscript>
+        "&lt;img src"asdsdsds.jpg" width="700" original="asdas.jpg"&gt;"
+      </noscript>
+      <span>
+        <div src="asd.jpg">
+
+        </div>
+      </span>
+    </figure>
+    img标签及其内的信息作为字符串保存在noscript标签中，src中为一张低品质图片，
+    data-original中为真实图片地址，同时有一个占位的span元素。当页面滚动到该noscript标签
+    对应的位置时，解析出noscript标签中的img，并替换占位span元素：
+    此时将先加载低质量的小图，再加载清晰的高质量原图：
+    如此一来，用户将在极短的时间内就能看到图片的大致轮廓。随后等真实图片加载完毕后，
+    再使用CSS控制图片逐渐变清晰，整个过程顺畅自然，一气呵成。在网速较差的环境下，
+    这种方式也能有很优雅的降级体验。
+    
+
+    其他方法:
+      梯度底色占位图：这种方式是通过后端的处理，将img标签中的图片提前做一次解析，处理为一种
+      带梯度的SVG元素，这种SVG元素所占体积极小，可以随页面一起直出。
+      换种思路，如果我们不想使用SVG，也可以直接将图片的主要背景颜色提取出来，使用base64方式
+      直出该图片。
+      SVG色块：我们可以通过一些简单的SVG元素拼接，描绘出图片的基本轮廓，并在此基础上加上一个
+      模糊滤镜，也可以达到很好的占位图效果。
+      二值化剪影：?
+      
+</body>
+</html>

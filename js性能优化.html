@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  1.避免全局查找   window.location.href   写为 var location = window.location
+    重复使用的调用结果，事先保存到局部变量
+
+  2.如果针对的是不断运行的代码，不应该使用 setTimeout，而应该是用 setInterval，
+    因为 setTimeout 每一次都会初始化一个定时器，而 setInterval 只会在开始的时候初始化一个定时器
+  
+  3.避免 with 语句,和函数类似 ，with 语句会创建自己的作用域，因此会增加其中执行的代码的作用域链
+    的长度，由于额外的作用域链的查找，在 with 语句中执行的代码肯定会比外面执行的代码要慢，在能不
+    使用 with 语句的时候尽量不要使用 with 语句。
+  
+  4.数字转换成字符串,一般最好用 "" + 1 来将数字转换成字符串，虽然看起来比较丑一点，但事实上这个
+    效率是最高的，性能上来说：("" +) > String() > .toString() > new String()
+    
+  5.浮点数转换成整型,很多人喜欢使用 parseInt()，其实 parseInt() 是用于将字符串转换成数字，
+    而不是浮点数和整型之间的转换，我们应该使用 Math.floor() 或者 Math.round()
+
+  6.各种类型转换:
+    var myVar = "3.14159",
+    str = "" + myVar, //  to string  
+    i_int = ~ ~myVar,  //  to integer  
+    f_float = 1 * myVar,  //  to float  
+    b_bool = !!myVar,  /*  to boolean - any string with length 
+                            and any number except 0 are true */
+    array = [myVar];  //  to array  
+
+  7.多个类型声明在 JavaScript 中所有变量都可以使用单个 var 语句来声明，这样就是组合在一起的语句
+    以减少整个脚本的执行时间，就如上面代码一样
+  
+  8.插入迭代器如 var name=values[i]; i++; 前面两条语句可以写成 var name=values[i++]
+
+  9.使用直接量
+    var aTest = new Array(); //替换为
+    var aTest = [];
+    var aTest = new Object; //替换为
+    var aTest = {};
+    var reg = new RegExp(); //替换为
+    var reg = /../;
+    //如果要创建具有一些特性的一般对象，也可以使用字面量，如下：
+    var oFruit = new O;
+    oFruit.color = "red";
+    oFruit.name = "apple";
+    //前面的代码可用对象字面量来改写成这样：
+    var oFruit = { color: "red", name: "apple" };
+
+  10.DOM添加优化, 使用 DocumentFragment 优化多次 append一旦需要更新 DOM, 请考虑使用文档碎片来
+    构建 DOM 结构，然后再将其添加到现存的文档中。
+    for (var i = 0; i < 1000; i++) {
+        var el = document.createElement('p');
+        el.innerHTML = i;
+        document.body.appendChild(el);
+    }
+    //可以替换为：
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < 1000; i++) {
+        var el = document.createElement('p');
+        el.innerHTML = i;
+        frag.appendChild(el);
+    }
+    document.body.appendChild(frag);
+    对于大的 DOM 更改，使用 innerHTML 要比使用标准的 DOM 方法创建同样的 DOM 结构快得多。
+    通过模板元素 clone，替代 createElement
+
+  11.使用 firstChild 和 nextSibling 代替 childNodes 遍历 dom 元素
+    var nodes = element.childNodes;
+    for (var i = 0, l = nodes.length; i < l; i++) {
+        var node = nodes[i];
+        //……
+    }
+    //可以替换为：
+    var node = element.firstChild;
+    while (node) {
+        node = node.nextSibling;
+    }
+
+  12.删除 DOM 节点,删除 dom 节点之前, 一定要删除注册在该节点上的事件否则将会产生无法回收的内存。
+    另外，在 removeChild 和 innerHTML=’’二者之间, 尽量选择后者. 因为在 sIEve(内存泄露监测工具) 
+    中监测的结果是用 removeChild 无法有效地释放 dom 节点
+
+  13.使用事件代理,任何可以冒泡的事件都不仅仅可以在事件目标上进行处理，目标的任何祖先节点上也能
+    处理，使用这个知识就可以将事件处理程序附加到更高的地方负责多个目标的事件处理，同样，对于内容
+    动态增加并且子节点都需要相同的事件处理函数的情况，可以把事件注册提到父节点上，这样就不需要为
+    每个子节点注册事件监听了。另外，现有的 js 库都采用 observe 方式来创建事件监听, 其实现上隔离
+    了 dom 对象和事件处理函数之间的循环引用, 所以应该尽量采用这种方式来创建事件监听
+
+  14.注意 NodeList
+    最小化访问 NodeList 的次数可以极大的改进脚本的性能,编写 JavaScript 的时候一定要知道何时
+    返回 NodeList 对象，这样可以最小化对它们的访问
+    
+    进行了对 getElementsByTagName() 的调用
+    获取了元素的 childNodes 属性
+    获取了元素的 attributes 属性
+    访问了特殊的集合，如 document.forms、document.images 等等
+    要了解了当使用 NodeList 对象时，合理使用会极大的提升代码执行速度
+  
+  15.优化循环
+    减值迭代
+    大多数循环使用一个从 0 开始、增加到某个特定值的迭代器，在很多情况下，从最大值开始，在循环中
+    不断减值的迭代器更加高效
+    
+    简化终止条件
+    由于每次循环过程都会计算终止条件，所以必须保证它尽可能快，也就是说避免属性查找或者其它的操作，
+    最好是将循环控制量保存到局部变量中，也就是说对数组或列表对象的遍历时，提前将 length 保存到局
+    部变量中，避免在循环的每一步重复取值。
+
+    简化循环体
+
+    使用后测试循环
+    在 JavaScript 中，我们可以使用 for(;;),while(),for(in) 三种循环，事实上，这三种循环中 
+    for(in) 的效率极差，因为他需要查询散列键，只要可以，就应该尽量少用。for(;;) 和 while 循环，
+    while 循环的效率要优于 for(;;)，可能是因为 for(;;) 结构的问题，需要经常跳转回去。
+    
+    var arr = [1, 2, 3, 4, 5, 6, 7];
+    var sum = 0;
+    for (var i = 0, l = arr.length; i < l; i++) {
+        sum += arr[i];
+    }
+    //可以考虑替换为：
+    var arr = [1, 2, 3, 4, 5, 6, 7];
+    var sum = 0, l = arr.length;
+    while (l--) {
+        sum += arr[l];
+    }
+    最常用的 for 循环和 while 循环都是前测试循环，而如 do-while 这种后测试循环，可以避免最初
+    终止条件的计算，因此运行更快
+
+  16.展开循环,当循环次数是确定的，消除循环并使用多次函数调用往往会更快。(递归函数)
+
+  17.避免双重解释,如果要提高代码性能，尽可能避免出现需要按照 JavaScript 解释的字符串，也就是
+    尽量少使用 eval 函数
+    使用 eval 相当于在运行时再次调用解释引擎对内容进行运行，需要消耗大量时间，而且使用 Eval 带来的安全性问题也是不容忽视的。
+    
+    不要使用 Function 构造器
+    不要给 setTimeout 或者 setInterval 传递字符串参数
+
+  18.条件分支,将条件分支，按可能性顺序从高到低排列：可以减少解释器对条件的探测次数
+    在同一条件子的多（>2）条件分支时，使用 switch 优于 if：switch 分支选择的效率高于 if，
+    在 IE 下尤为明显。4 分支的测试，IE 下 switch 的执行时间约为 if 的一半。
+    使用三目运算符替代条件分支
+
+  19.使用常量
+    重复值: 任何在多处用到的值都应该抽取为一个常量
+    用户界面字符串: 任何用于显示给用户的字符串，都应该抽取出来以方便国际化
+    URLs: 在 Web 应用中，资源位置很容易变更，所以推荐用一个公共地方存放所有的 URL
+    任意可能会更改的值: 这个值在未来是不是会变化，是，那么这个值就应该被提取出来作为一个常量。
+
+  20.避免与 null 进行比较
+    由于 JavaScript 是弱类型的，所以它不会做任何的自动类型检查，所以如果看到与 null 进行比较的
+    代码，尝试使用以下技术替换
+    
+    如果值应为一个引用类型，使用 instanceof 操作符检查其构造函数
+    如果值应为一个基本类型，作用 typeof 检查其类型
+    如果是希望对象包含某个特定的方法名，则使用 typeof 操作符确保指定名字的方法存在于对象上
+
+  21.避免全局量,全局变量应该全部字母大写，各单词之间用_下划线来连接
+    //糟糕的全局变量和全局函数
+    var current = null;
+    function init(){
+    //...
+    }
+    function change() {
+        //...
+    }
+    function verify() {
+        //...
+    }
+    //解决办法有很多，Christian Heilmann建议的方法是：
+    //如果变量和函数不需要在“外面”引用，那么就可以使用一个没有名字的方法将他们全都包起来。
+    (function(){
+    var current = null;
+    function init() {
+        //...
+    }
+    function change() {
+        //...
+    }
+    function verify() {
+        //...
+    }
+    })();
+    //如果变量和函数需要在“外面”引用，需要把你的变量和函数放在一个“命名空间”中
+    //我们这里用一个function做命名空间而不是一个var，因为在前者中声明function更简单，而且能保护隐私数据
+    myNameSpace = function() {
+        var current = null;
+        function init() {
+            //...
+        }
+        function change() {
+            //...
+        }
+        function verify() {
+            //...
+        }
+    //所有需要在命名空间外调用的函数和属性都要写在return里面
+        return {
+            init: init,
+            //甚至你可以为函数和属性命名一个别名
+            set: change
+        };
+    };
+
+  22.尊重对象的所有权,因为 JavaScript 可以在任何时候修改任意对象，这样就可以以不可预计的方式覆
+    写默认的行为，所以如果你不负责维护某个对象，它的对象或者它的方法，那么你就不要对它进行修改，
+    具体一点就是说：
+  
+    不要为实例或原型添加属性
+    不要为实例或者原型添加方法
+    不要重定义已经存在的方法
+    不要重复定义其它团队成员已经实现的方法，永远不要修改不是由你所有的对象，你可以通过以下方式为对象创建新的功能:
+    创建包含所需功能的新对象，并用它与相关对象进行交互
+    创建自定义类型，继承需要进行修改的类型，然后可以为自定义类型添加额外功能
+
+  23.循环引用   内存问题
+    如果循环引用中包含 DOM 对象或者 ActiveX 对象，那么就会发生内存泄露。内存泄露的后果是在
+    浏览器关闭前，即使是刷新页面，这部分内存不会被浏览器释放。
+    
+    简单的循环引用：
+      var el = document.getElementById('MyElement');
+      var func = function () {
+          //…
+      }
+      el.func = func;
+      func.element = el;
+    
+    但是通常不会出现这种情况。通常循环引用发生在为 dom 元素添加闭包作为 expendo 的时候。
+      
+      function init() {
+          var el = document.getElementById('MyElement');
+          el.onclick = function () {
+              //……
+          }
+      }
+      init();
+    init 在执行的时候，当前上下文我们叫做 context。这个时候，context 引用了 el，
+    el 引用了 function，function 引用了 context。这时候形成了一个循环引用。
+      
+    下面 2 种方法可以解决循环引用：
+      1.置空 dom 对象
+      
+      function init() {
+          var el = document.getElementById('MyElement');
+          el.onclick = function () {
+              //……
+          }
+      }
+      init();
+      //可以替换为：
+      function init() {
+          var el = document.getElementById('MyElement');
+          el.onclick = function () {
+              //……
+          }
+          el = null;
+      }
+      init();
+    将 el 置空，context 中不包含对 dom 对象的引用，从而打断循环应用。
+    如果我们需要将 dom 对象返回，可以用如下方法：
+    
+      function init() {
+          var el = document.getElementById('MyElement');
+          el.onclick = function () {
+              //……
+          }
+          return el;
+      }
+      init();
+      //可以替换为：
+      function init() {
+          var el = document.getElementById('MyElement');
+          el.onclick = function () {
+              //……
+          }
+          try {
+              return el;
+          } finally {
+              el = null;
+          }
+      }
+      init();
+    2. 构造新的 context
+    
+      function init() {
+          var el = document.getElementById('MyElement');
+          el.onclick = function () {
+              //……
+          }
+      }
+      init();
+      //可以替换为：
+      function elClickHandler() {
+          //……
+      }
+      function init() {
+          var el = document.getElementById('MyElement');
+          el.onclick = elClickHandler;
+      }
+      init();
+      把 function 抽到新的 context 中，这样，function 的 context 就不包含对 el 的引用，
+      从而打断循环引用。
+  
+  24.通过 javascript 创建的 dom 对象，必须 append 到页面中
+    IE 下，脚本创建的 dom 对象，如果没有 append 到页面中，刷新页面，这部分内存是不会回收的！
+    
+  25.释放 dom 元素占用的内存,将 dom 元素的 innerHTML 设置为空字符串，可以释放其子元素占用的内存。
+    在 rich 应用中，用户也许会在一个页面上停留很长时间，可以使用该方法释放积累得越来越多的 dom
+    元素使用的内存。
+
+  26.释放 javascript 对象
+    在 rich 应用中，随着实例化对象数量的增加，内存消耗会越来越大。所以应当及时释放对对象的引用，
+    让 GC 能够回收这些内存控件。
+    对象： obj = null
+    对象属性： delete obj.myproperty
+    数组 item：使用数组的 splice 方法释放数组中不用的 item
+  
+  27.避免 string 的隐式装箱
+    对 string 的方法调用，比如'xxx'.length，浏览器会进行一个隐式的装箱操作，将字符串先转换成
+    一个 String 对象。推荐对声明有可能使用 String 实例方法的字符串时，采用如下写法：
+    var myString = new String('Hello World');
+  
+  28.  松散耦合
+    1、解耦 HTML/JavaScript
+      JavaScript 和 HTML 的紧密耦合：直接写在 HTML 中的 JavaScript、使用包含内联代码的
+       script 元素、使用 HTML 属性来分配事件处理程序等HTML 和 JavaScript 的紧密耦合：
+       JavaScript 中包含 HTML，然后使用 innerHTML 来插入一段 html 文本到页面
+      其实应该是保持层次的分离，这样可以很容易的确定错误的来源，所以我们应确保 HTML 呈现应该尽
+      可能与 JavaScript 保持分离
+    
+    2、解耦 CSS/JavaScript
+      显示问题的唯一来源应该是 CSS，行为问题的唯一来源应该是 JavaScript，层次之间保持松散耦合才
+      可以让你的应用程序更加易于维护，所以像以下的代码 element.style.color="red" 尽量改为 
+      element.className="edit"，而且不要在 css 中通过表达式嵌入 JavaScript
+    
+    3、解耦应用程序 / 事件处理程序
+      将应用逻辑和事件处理程序相分离：一个事件处理程序应该从事件对象中提取，并将这些信息传送给
+      处理应用逻辑的某个方法中。这样做的好处首先可以让你更容易更改触发特定过程的事件，其次可以在
+      不附加事件的情况下测试代码，使其更易创建单元测试
+  
+  29.
+    switch 语句相对 if 较快,通过将 case 语句按照最可能到最不可能的顺序进行组织
+  
+    位运算较快,当进行数字运算时，位运算操作要比任何布尔运算或者算数运算快
+  
+    巧用 ||和 && 布尔运算符
+    function eventHandler(e) {
+      if (!e) e = window.event;
+    }
+    //可以替换为：
+    function eventHandler(e) {
+        e = e || window.event;
+    }
+    if (myobj) {
+        doSomething(myobj);
+    }
+    //可以替换为：
+    myobj && doSomething(myobj);
+    
+  30.HTML中用双引号,JS中使用单引号,定义JSON对象时用双引号
+
+
+  </body>
+</html>
