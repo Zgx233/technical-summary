@@ -1,0 +1,17 @@
+  setInterval和setTimeout中传入函数时，函数中的this会指向window对象这是由于setTimeout()调用
+的代码运行在与所在函数完全分离的执行环境上. 这会导致这些代码中包含的 this 关键字会指向 window
+ (或全局)对象
+  但是在setTimeout中传入的不是函数时，this则指向当前对象: setTimeout(console.log(1), 1000)
+  当在setTimeout中传入了一个函数，若想要让this指向正确的值，可以使用以下两种比较常用的方法来使
+this指向正确的值.
+    1.将当前对象的this存为一个变量，定时器内的函数利用闭包来访问这个变量
+    2.利用bind()方法
+      setTimeout(function(){
+        console.log(this.num);
+      }.bind(this), 1000) //利用bind()将this绑定到这个函数上
+  bind()方法是在Function.prototype上的一个方法，当被绑定函数执行时，bind方法会创建一个新函数
+并将第一个参数作为新函数运行时的this。
+  以上两种方法都是比较常用的，当然如果使用call或apply方法来代替bind方法，得到的结果也是正确的
+但是call方法会在调用之后立即执行，那样也就没有了延时的效果，定时器也就没有用了
+
+
