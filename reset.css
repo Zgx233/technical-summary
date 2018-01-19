@@ -99,4 +99,10 @@ table {
 	line-height: normal;
 	vertical-align: sub;
 }
+.bold {
+    font-weight:bold;
+}
+.lineFeed {
+    word-wrap: break-word;
+}
 
