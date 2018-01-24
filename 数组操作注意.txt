@@ -24,23 +24,6 @@
 我花了一些时间写了一个简单的深拷贝数组或对象的函数，测试发现运行速度差不多是使用 JSON 中转的 6 倍左右，顺便还支持了 TypedArray、RegExp 的对象的复制
     
     
-不要用 arr.map 代替 arr.forEach
-
-    也是一个 JavaScript 初学者常常犯的错误，他们往往并没有分清 Array.prototype.map
-    和 Array.prototype.forEach 的实际含义。
-
-    map 中文叫做 映射，它通过将某个序列依次执行某个函数导出另一个新的序列。这个函数通常是不含副作用的，
-    更不会修改原始的数组（所谓纯函数）。
-
-    forEach 就没有那么多说法，它就是简单的把数组中所有项都用某个函数处理一遍。
-    由于 forEach 没有返回值（返回 undefined），所以它的回调函数通常是包含副作用的，
-    否则这个 forEach 写了毫无意义。
-
-    确实 map 比 forEach 更加强大，但是 map 会创建一个新的数组，占用内存。如果你不用 map 的返回值，
-    那你就应当使用 forEach
-    
-    
-
 forEach 与 break
 
     ES6 以前，遍历数组主要就是两种方法：手写循环用下标迭代，使用 Array.prototype.forEach。
