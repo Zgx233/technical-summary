@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    /* 
+      文字垂直显示可用 br换行, 或者控制容器大小把文字挤为一行显示
+
+      flex-direction方向改为柱,writing-mode:tb;垂直排布
+      再加了写入模式writing-mode之后, 会根据选择的效果使排版方式转换
+      会使text-align和line-height的效果互换 
+    */
+    #container {
+      width: 100px;
+      height: 150px;
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      
+    }
+    .box {
+      flex: 1;
+      writing-mode: tb;
+      line-height: 100px;      
+    }
+    .box:nth-child(odd) {
+      background-color: gray;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div class="box">一号</div>
+    <div class="box">二号</div>
+    <div class="box">三号</div>
+  </div>
+</body>
+</html>
